@@ -2,8 +2,8 @@ import threading
 
 import yaml
 
-from RedditMonitor import RedditMonitor
-from State import State
+from reddit_monitor import RedditMonitor
+from state import State
 
 
 def main():
