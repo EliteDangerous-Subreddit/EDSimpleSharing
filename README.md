@@ -10,3 +10,7 @@ For posting submissions it listens
 
 1. New wiki pages that have timestamp in the future, and
 1. New posts by moderators or approved users with config-specific prefix entry. 
+
+## Requirements
+
+Python 3.7+
