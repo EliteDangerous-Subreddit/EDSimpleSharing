@@ -18,3 +18,9 @@ class State(object):
 
     def submission_has_been_posted(self, submission):
         pass
+
+    def wiki_article_exists_in_db(self, name):
+        pass
+
+    def get_editable_submissions(self, include_archived=False):
+        pass

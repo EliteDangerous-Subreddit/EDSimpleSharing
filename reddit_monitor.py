@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 
 import praw
@@ -29,15 +30,38 @@ class RedditMonitor(object):
         # retrieve all relevant wiki page name from database
         # iterate through all wiki pages' revisions to see if they correspond with database entry
         # if not, there is a change and original post should be updated
-        print("checking wiki")
-        pass
+        for db_submission in self.state.get_editable_submissions():
+            wiki_subreddit = self.reddit.subreddit(self.state.config['wiki']['subreddit'])
+            latest_revision = wiki_subreddit.wiki[db_submission.wiki_article_name].revisions()[0]
+            if latest_revision.id is not db_submission.revision_id:
+                submission = self.reddit.submission(id=db_submission.submission_id)
+                submission.edit(latest_revision.content_md)
 
     def add_new_scheduled_posts(self):
         # iterate through all wiki articles every 2 hours
         # check if any threads exist in category that is for the future
         # add to database table through State with wiki-title, time, and type
         # type is determined to be a link if wiki content only contains link, otherwise self
-        pass
+        print("checking wiki")
+        wiki_subreddit = self.reddit.subreddit(self.state.config['wiki']['subreddit'])
+        for wiki in wiki_subreddit.wiki:
+            r = re.search(re.escape(self.state.config['wiki']['article_category']) + r"/(.+?)/(.+)", wiki.name)
+            if r is not None:
+
+                search_content = re.search(
+                    r"https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&/=]*)",
+                    wiki.content_md)
+                if search_content is not None:
+                    submission_type = "link"
+                else:
+                    submission_type = "self"
+
+                scheduled_time = datetime.strptime(r.group(1), "%Y-%m-%dT%H_%M_%S%")
+                if scheduled_time > datetime.now() and not self.state.wiki_article_exists_in_db():
+                    self.state.schedule_post(title=r.group(2),
+                                             body=wiki.content_md,
+                                             scheduled_time=scheduled_time,
+                                             submission_type=submission_type)
 
     def check_scheduled_posts(self):
         # iterate through database every minute to see if post datetime is in the future or past

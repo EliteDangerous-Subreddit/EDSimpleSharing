@@ -17,6 +17,6 @@ class LinkSubmission(Submission):
 
 
 class SelfSubmission(Submission):
-    wiki_id = Required(str)
+    wiki_article_name = Required(str)
     revision_id = Required(str)
     last_updated = Required(datetime)

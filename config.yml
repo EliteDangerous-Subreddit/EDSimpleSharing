@@ -1,8 +1,6 @@
 wiki:
   subreddit: 'EliteDangerous'
   article_category: 'edmods_posts'
-  allow_approved_submittors: true
-  whitelisted_users: []
 submissions:
   listen_from_subreddit: 'EliteDangerous'
   post_to_subreddit: 'EliteDangerous'
