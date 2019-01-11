@@ -30,6 +30,10 @@ class State(object):
                                original_submission_id=original_submission_id)
 
     @db_session
+    def update_revision(self, db_submission_id, revision_id):
+        self.db.SelfSubmission[db_submission_id].revision_id = revision_id
+
+    @db_session
     def submission_has_been_posted(self, submission_id):
         return self.db.Submission.exists(original_submission_id=submission_id, status="posted")
 
@@ -43,4 +47,4 @@ class State(object):
             return self.db.SelfSubmission.select()[:]
         else:
             return self.db.SelfSubmission.select(
-                lambda s: s.last_updated < datetime.datetime.now() - datetime.timedelta(days=180))[:]
+                lambda s: s.last_updated > datetime.datetime.now() - datetime.timedelta(days=180))[:]

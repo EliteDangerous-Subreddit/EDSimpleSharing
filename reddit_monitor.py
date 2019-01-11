@@ -14,7 +14,6 @@ class RedditMonitor(object):
         Listens to new submissions from the ['submissions']['listen_from_subreddit'] config entry from config.yml.
         It should be possible to listen to multiple subreddits by using subreddits concatenated with plus,
         e.g. 'EliteDangerous+starcitizen'
-        :return:
         """
         subreddit = self.reddit.subreddit(self.state.config['submissions']['listen_from_subreddit'])
         print("checking submissions")
@@ -30,12 +29,16 @@ class RedditMonitor(object):
         # retrieve all relevant wiki page name from database
         # iterate through all wiki pages' revisions to see if they correspond with database entry
         # if not, there is a change and original post should be updated
-        for db_submission in self.state.get_editable_submissions():
+        print("checking wiki")
+        submissions = self.state.get_editable_submissions()
+        for db_submission in submissions:
             wiki_subreddit = self.reddit.subreddit(self.state.config['wiki']['subreddit'])
-            latest_revision = wiki_subreddit.wiki[db_submission.wiki_article_name].revisions()[0]
-            if latest_revision.id is not db_submission.revision_id:
+            latest_revision = next(wiki_subreddit.wiki[db_submission.wiki_article_name].revisions())
+            if latest_revision['id'] is not db_submission.revision_id:
                 submission = self.reddit.submission(id=db_submission.submission_id)
-                submission.edit(latest_revision.content_md)
+                print("Updating " + submission.permalink)
+                submission.edit(latest_revision['page'].content_md)
+                self.state.update_revision(db_submission.id, latest_revision['id'])
 
     def add_new_scheduled_posts(self):
         # iterate through all wiki articles every 2 hours
@@ -49,7 +52,7 @@ class RedditMonitor(object):
             if r is not None:
 
                 search_content = re.search(
-                    r"https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&/=]*)",
+                    r"^https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&/=]*)$",
                     wiki.content_md)
                 if search_content is not None:
                     submission_type = "link"
@@ -92,9 +95,10 @@ class RedditMonitor(object):
             new_submission = post_to_subreddit.submit(title=post_title,
                                                       selftext=submission.selftext,
                                                       send_replies=False)
+            new_submission.mod.distinguish()
             new_wiki_page = wiki_subreddit.wiki.create(name=name,
                                                        content=submission.selftext,
-                                                       reason="Creating new u/EDMods submission - "
+                                                       reason="New shared submission - "
                                                               + new_submission.shortlink)
 
             self.state.new_self_post(submission_id=new_submission.id,
@@ -106,6 +110,7 @@ class RedditMonitor(object):
             new_submission = post_to_subreddit.submit(title=post_title,
                                                       url=submission.url,
                                                       send_replies=False)
+            new_submission.mod.distinguish()
             self.state.new_link_post(submission_id=new_submission.id,
                                      url=submission.url,
                                      original_submission_id=submission.id)
