@@ -89,14 +89,23 @@ class RedditMonitor(object):
                    + "/" \
                    + post_title
             print(name)
-            new_wiki_page = wiki_subreddit.wiki.create(name, submission.selftext, "Creating new u/EDMods submission")
             new_submission = post_to_subreddit.submit(title=post_title,
                                                       selftext=submission.selftext,
                                                       send_replies=False)
+            new_wiki_page = wiki_subreddit.wiki.create(name=name,
+                                                       content=submission.selftext,
+                                                       reason="Creating new u/EDMods submission - "
+                                                              + new_submission.shortlink)
 
-            self.state.new_self_post(new_submission.id, new_wiki_page.name, next(new_wiki_page.revisions())['id'])
+            self.state.new_self_post(submission_id=new_submission.id,
+                                     wiki_name=new_wiki_page.name,
+                                     revision_id=next(new_wiki_page.revisions())['id'],
+                                     original_submission_id=submission.id
+                                     )
         else:
             new_submission = post_to_subreddit.submit(title=post_title,
                                                       url=submission.url,
                                                       send_replies=False)
-            self.state.new_link_post(new_submission.id)
+            self.state.new_link_post(submission_id=new_submission.id,
+                                     url=submission.url,
+                                     original_submission_id=submission.id)

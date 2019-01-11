@@ -13,24 +13,25 @@ class State(object):
         self.db.generate_mapping(create_tables=True)
 
     @db_session
-    def new_self_post(self, submission_id, wiki_name, revision_id):
+    def new_self_post(self, submission_id, wiki_name, revision_id, original_submission_id=None):
         self.db.SelfSubmission(submission_id=submission_id,
                                wiki_article_name=wiki_name,
                                revision_id=revision_id,
                                last_updated=datetime.datetime.now(),
-                               status="posted")
-        # save submission and wiki info to database
-        # wiki info should save revision datetime or revision number
-        # submission info should include date of creation to be able to retrieve posts younger than 6 months
-        pass
+                               status="posted",
+                               original_submission_id=original_submission_id)
 
     @db_session
-    def new_link_post(self, submission_id):
-        pass
+    def new_link_post(self, submission_id, url, original_submission_id=None):
+        self.db.LinkSubmission(submission_id=submission_id,
+                               last_updated=datetime.datetime.now(),
+                               url=url,
+                               status="posted",
+                               original_submission_id=original_submission_id)
 
     @db_session
     def submission_has_been_posted(self, submission_id):
-        return self.db.Submission.exists(submission_id=submission_id, status="posted")
+        return self.db.Submission.exists(original_submission_id=submission_id, status="posted")
 
     @db_session
     def wiki_article_exists_in_db(self, name):

@@ -10,6 +10,7 @@ class Submission(db.Entity):
     submission_id = Required(str)
     created_at = Required(datetime, sql_default='CURRENT_TIMESTAMP')
     status = Required(str)
+    original_submission_id = Optional(str)
 
 
 class LinkSubmission(Submission):
