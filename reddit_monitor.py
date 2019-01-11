@@ -74,28 +74,29 @@ class RedditMonitor(object):
         Creates a new wiki page and submission on u/EDMods based on submission
         :param submission: Submission from moderator that contains '[EDMods]'
         """
-        if self.state.submission_has_been_posted(submission):
+        if self.state.submission_has_been_posted(submission.id):
             return
 
         post_to_subreddit = self.reddit.subreddit(self.state.config['submissions']['post_to_subreddit'])
         wiki_subreddit = self.reddit.subreddit(self.state.config['wiki']['subreddit'])
+        post_title = submission.title[re.search(r'\[EDMods\]\s*', submission.title).span()[1]:]
+
         # Post needs to be a self post to save to wiki
         if submission.is_self:
             name = self.state.config['wiki']['article_category'] \
                    + "/" \
                    + datetime.utcfromtimestamp(submission.created_utc).isoformat().replace(":", "_") \
                    + "/" \
-                   + submission.title[len('[EDMods]'):]
+                   + post_title
             print(name)
             new_wiki_page = wiki_subreddit.wiki.create(name, submission.selftext, "Creating new u/EDMods submission")
-            new_submission = post_to_subreddit.submit(title=submission.title[len('[EDMods]'):],
+            new_submission = post_to_subreddit.submit(title=post_title,
                                                       selftext=submission.selftext,
                                                       send_replies=False)
-            self.state.new_self_post(new_submission, new_wiki_page)
+
+            self.state.new_self_post(new_submission.id, new_wiki_page.name, next(new_wiki_page.revisions())['id'])
         else:
-            new_submission = post_to_subreddit.submit(title=submission.title[len('[EDMods]'):],
+            new_submission = post_to_subreddit.submit(title=post_title,
                                                       url=submission.url,
                                                       send_replies=False)
-            self.state.new_link_post(new_submission)
-            # Post new submission with link
-            pass
+            self.state.new_link_post(new_submission.id)

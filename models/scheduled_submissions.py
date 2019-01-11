@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from models.base import db
 from pony.orm import *
