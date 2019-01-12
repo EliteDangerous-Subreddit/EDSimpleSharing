@@ -24,7 +24,6 @@ class State(object):
     @db_session
     def new_link_post(self, submission_id, url, original_submission_id=None):
         self.db.LinkSubmission(submission_id=submission_id,
-                               last_updated=datetime.datetime.now(),
                                url=url,
                                status="posted",
                                original_submission_id=original_submission_id)

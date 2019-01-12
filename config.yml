@@ -6,3 +6,6 @@ wiki:
 submissions:
   listen_from_subreddit: 'EliteDangerous'
   post_to_subreddit: 'EliteDangerous'
+  phrase: '[EDMods]'
+  distinguish_post: true
+  remove_original: true
