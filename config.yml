@@ -1,6 +1,8 @@
 wiki:
   subreddit: 'EliteDangerous'
   article_category: 'edmods_posts'
+  mods_only: true
+  list_in_wiki_list: true
 submissions:
   listen_from_subreddit: 'EliteDangerous'
   post_to_subreddit: 'EliteDangerous'
