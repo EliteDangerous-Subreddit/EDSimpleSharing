@@ -34,7 +34,7 @@ class RedditMonitor(object):
         for db_submission in submissions:
             wiki_subreddit = self.reddit.subreddit(self.state.config['wiki']['subreddit'])
             latest_revision = next(wiki_subreddit.wiki[db_submission.wiki_article_name].revisions())
-            if latest_revision['id'] is not db_submission.revision_id:
+            if latest_revision['id'] != db_submission.revision_id:
                 submission = self.reddit.submission(id=db_submission.submission_id)
                 print("Updating " + submission.permalink)
                 submission.edit(latest_revision['page'].content_md)
