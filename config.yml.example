@@ -9,3 +9,6 @@ submissions:
   phrase: '[EDMods]'
   distinguish_post: true
   remove_original: true
+notify_modmail:
+  activated: true
+  subreddit: 'EliteDangerous'
