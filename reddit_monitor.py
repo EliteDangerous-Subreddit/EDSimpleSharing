@@ -1,6 +1,5 @@
 import re
 from datetime import datetime
-
 import praw
 
 
@@ -91,11 +90,15 @@ class RedditMonitor(object):
                                                 ).span()[1]:]
 
         # Post needs to be a self post to save to wiki
+        wiki_name = None
         if submission.is_self:
-            self.create_self_post(post_title, post_to_subreddit, submission, wiki_subreddit)
+            new_submission, wiki_name = self.create_self_post(post_title, post_to_subreddit, submission, wiki_subreddit)
+            wiki_name = f"/r/{self.state.config['wiki']['subreddit']}/wiki/{wiki_name}"
         else:
-            self.create_link_post(post_title, post_to_subreddit, submission)
+            new_submission = self.create_link_post(post_title, post_to_subreddit, submission)
 
+        if self.state.config['notify_modmail']['activated']:
+            self.notify_modmail(submission.author.name, new_submission, wiki_name)
         if self.state.config['submissions']['remove_original']:
             submission.mod.remove()
 
@@ -124,6 +127,7 @@ class RedditMonitor(object):
                                  revision_id=next(new_wiki_page.revisions())['id'],
                                  original_submission_id=submission.id
                                  )
+        return new_submission, name
 
     def create_link_post(self, post_title, post_to_subreddit, submission):
         new_submission = post_to_subreddit.submit(title=post_title,
@@ -134,3 +138,12 @@ class RedditMonitor(object):
         self.state.new_link_post(submission_id=new_submission.id,
                                  url=submission.url,
                                  original_submission_id=submission.id)
+        return new_submission
+
+    def notify_modmail(self, created_by, submission, wiki_name):
+        subreddit = self.reddit.subreddit(self.state.config['notify_modmail']['subreddit'])
+        body = f"u/{created_by.name} created a new shared submission\n\n" + \
+               f"[{submission.title}]({submission.permalink})"
+        if wiki_name:
+            body += f" ^([edit here]({wiki_name}))"
+        subreddit.message("[Notification] New moderator shared post", body)
