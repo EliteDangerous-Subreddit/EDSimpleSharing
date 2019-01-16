@@ -11,6 +11,12 @@ For posting submissions it listens
 1. New wiki pages that have timestamp in the future, and
 1. New posts by moderators or approved users with config-specific prefix entry. 
 
-## Requirements
+## Installation
 
-Python 3.7+
+Requires Python 3.7 or higher. 
+
+1. Copy `praw.ini.example` to `praw.ini` and configure as needed by setting up a [Reddit script app on the shared account](https://www.reddit.com/prefs/apps/)
+1. Copy `config.yml.example` to `config.yml` and configure as needed
+1. Setup a virtualenv if needed
+1. Run `pip install -r requirements.txt`
+1. Start the script by running `python main.py`
