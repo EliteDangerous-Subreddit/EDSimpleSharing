@@ -116,8 +116,8 @@ class RedditMonitor(object):
             new_submission.mod.distinguish()
         new_wiki_page = wiki_subreddit.wiki.create(name=name,
                                                    content=submission.selftext,
-                                                   reason="New shared submission - "
-                                                          + new_submission.shortlink)
+                                                   reason=f"New shared submission - "
+                                                   f"{new_submission.shortlink} by {submission.author.name}")
         if self.state.config['wiki']['mods_only']:
             new_wiki_page.mod.update(permlevel=2, listed=self.state.config['wiki']['list_in_wiki_list'])
         elif self.state.config['wiki']['list_in_wiki_list']:
