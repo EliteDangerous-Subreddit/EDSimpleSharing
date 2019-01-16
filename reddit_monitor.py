@@ -1,10 +1,16 @@
 import re
 from datetime import datetime
 import praw
+from state import State
 
 
 class RedditMonitor(object):
     def __init__(self, state):
+        """
+        Initializes PRAW and sets state to the class.
+        :param state: A State instance
+        :type state: State
+        """
         self.state = state
         self.reddit = praw.Reddit()
 
@@ -27,9 +33,6 @@ class RedditMonitor(object):
         Checks all the wiki articles and checks if the corresponding submission needs to be updated.
         If submission needs to be updated it replaces the submission content with the wiki content.
         """
-        # retrieve all relevant wiki page name from database
-        # iterate through all wiki pages' revisions to see if they correspond with database entry
-        # if not, there is a change and original post should be updated
         print("checking wiki")
         submissions = self.state.get_editable_submissions()
         for db_submission in submissions:
@@ -49,7 +52,8 @@ class RedditMonitor(object):
         print("checking wiki for to be scheduled posts")
         wiki_subreddit = self.reddit.subreddit(self.state.config['wiki']['subreddit'])
         re_url = re.compile(r"^https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&/=]*)$")
-        re_category = re.compile(re.escape(self.state.config['wiki']['article_category']) + r"/(.+?)/(.+)")
+        re_category = re.compile(re.escape(self.state.config['wiki']['article_category']) +
+                                 r"/(\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T(0[0-9]|1[0-9]|2[0-3])-(0[0-9]|[0-5][0-9])-(0[0-9]|[0-5][0-9]))/(.+)")
         for wiki in wiki_subreddit.wiki:
             r = re_category.search(wiki.name, re.IGNORECASE)
             if r is not None:
@@ -61,7 +65,7 @@ class RedditMonitor(object):
                 else:
                     submission_type = "self"
 
-                scheduled_time = datetime.strptime(r.group(1), "%Y-%m-%dT%H-%M-%S%")
+                scheduled_time = datetime.strptime(r.group(1), "%Y-%m-%dT%H-%M-%S")
                 if scheduled_time > datetime.now() and not self.state.wiki_article_exists_in_db():
                     self.state.schedule_post(title=r.group(2),
                                              body=wiki.content_md,
