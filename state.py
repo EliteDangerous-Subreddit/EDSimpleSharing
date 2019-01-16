@@ -15,18 +15,18 @@ class State(object):
     @db_session
     def new_self_post(self, submission_id, wiki_name, revision_id, original_submission_id=None):
         return self.db.SelfSubmission(submission_id=submission_id,
-                               wiki_article_name=wiki_name,
-                               revision_id=revision_id,
-                               last_updated=datetime.datetime.now(),
-                               status="posted",
-                               original_submission_id=original_submission_id)
+                                      wiki_article_name=wiki_name,
+                                      revision_id=revision_id,
+                                      last_updated=datetime.datetime.now(),
+                                      status="posted",
+                                      original_submission_id=original_submission_id)
 
     @db_session
     def new_link_post(self, submission_id, url, original_submission_id=None):
         return self.db.LinkSubmission(submission_id=submission_id,
-                               url=url,
-                               status="posted",
-                               original_submission_id=original_submission_id)
+                                      url=url,
+                                      status="posted",
+                                      original_submission_id=original_submission_id)
 
     @db_session
     def update_revision(self, db_submission_id, revision_id):
@@ -46,4 +46,4 @@ class State(object):
             return self.db.SelfSubmission.select()[:]
         else:
             return self.db.SelfSubmission.select(
-                lambda s: s.last_updated > datetime.datetime.now() - datetime.timedelta(days=180))[:]
+                lambda s: s.created_at > datetime.datetime.now() - datetime.timedelta(days=180))[:]
