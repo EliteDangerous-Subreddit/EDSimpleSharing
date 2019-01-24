@@ -15,18 +15,18 @@ class State(object):
     @db_session
     def new_self_post(self, submission_id, wiki_name, revision_id, original_submission_id=None):
         return self.db.SelfSubmission(submission_id=submission_id,
-                               wiki_article_name=wiki_name,
-                               revision_id=revision_id,
-                               last_updated=datetime.datetime.now(),
-                               status="posted",
-                               original_submission_id=original_submission_id)
+                                      wiki_article_name=wiki_name,
+                                      revision_id=revision_id,
+                                      last_updated=datetime.datetime.now(),
+                                      status="posted",
+                                      original_submission_id=original_submission_id)
 
     @db_session
     def new_link_post(self, submission_id, url, original_submission_id=None):
         return self.db.LinkSubmission(submission_id=submission_id,
-                               url=url,
-                               status="posted",
-                               original_submission_id=original_submission_id)
+                                      url=url,
+                                      status="posted",
+                                      original_submission_id=original_submission_id)
 
     @db_session
     def update_revision(self, db_submission_id, revision_id):

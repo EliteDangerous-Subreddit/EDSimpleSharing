@@ -67,10 +67,10 @@ class RedditMonitor(object):
         else:
             new_submission = self.create_link_post(post_title, post_to_subreddit, submission)
 
-        if self.state.config['notify_modmail']['activated']:
-            self.notify_modmail(submission.author.name, new_submission, wiki_name)
         if self.state.config['submissions']['remove_original']:
             submission.mod.remove()
+        if self.state.config['notify_modmail']['activated']:
+            self.notify_modmail(submission.author.name, new_submission, wiki_name)
 
     def create_self_post(self, post_title, post_to_subreddit, submission, wiki_subreddit):
         name = self.state.config['wiki']['article_category'] \
@@ -112,7 +112,7 @@ class RedditMonitor(object):
 
     def notify_modmail(self, created_by, submission, wiki_name):
         subreddit = self.reddit.subreddit(self.state.config['notify_modmail']['subreddit'])
-        body = f"u/{created_by.name} created a new shared submission\n\n" + \
+        body = f"u/{created_by} created a new shared submission\n\n" + \
                f"[{submission.title}]({submission.permalink})"
         if wiki_name:
             body += f" ^([edit here]({wiki_name}))"
