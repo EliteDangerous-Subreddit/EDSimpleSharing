@@ -73,18 +73,18 @@ class RedditMonitor(object):
             self.notify_modmail(submission.author.name, new_submission, wiki_name)
 
     def create_self_post(self, post_title, post_to_subreddit, submission, wiki_subreddit):
-        name = self.state.config['wiki']['article_category'] \
+        wiki_name = self.state.config['wiki']['article_category'] \
                + "/" \
                + datetime.utcfromtimestamp(submission.created_utc).isoformat().replace(":", "-") \
                + "/" \
-               + post_title
-        print(name)
+               + re.sub(r'[^a-zA-Z0-9_ ]+', '', post_title.lower())
+        print(wiki_name)
         new_submission = post_to_subreddit.submit(title=post_title,
                                                   selftext=submission.selftext,
                                                   send_replies=False)
         if self.state.config['submissions']['distinguish_post']:
             new_submission.mod.distinguish()
-        new_wiki_page = wiki_subreddit.wiki.create(name=name,
+        new_wiki_page = wiki_subreddit.wiki.create(name=wiki_name,
                                                    content=submission.selftext,
                                                    reason=f"New shared submission - "
                                                    f"{new_submission.shortlink} by {submission.author.name}")
@@ -97,7 +97,7 @@ class RedditMonitor(object):
                                  revision_id=next(new_wiki_page.revisions())['id'],
                                  original_submission_id=submission.id
                                  )
-        return new_submission, name
+        return new_submission, wiki_name
 
     def create_link_post(self, post_title, post_to_subreddit, submission):
         new_submission = post_to_subreddit.submit(title=post_title,
