@@ -74,10 +74,10 @@ class RedditMonitor(object):
 
     def create_self_post(self, post_title, post_to_subreddit, submission, wiki_subreddit):
         wiki_name = self.state.config['wiki']['article_category'] \
-               + "/" \
-               + datetime.utcfromtimestamp(submission.created_utc).isoformat().replace(":", "-") \
-               + "/" \
-               + re.sub(r'[^a-zA-Z0-9_ ]+', '', post_title.lower())
+                    + "/" \
+                    + datetime.utcfromtimestamp(submission.created_utc).isoformat().replace(":", "-") \
+                    + "/" \
+                    + re.sub(r'[^a-zA-Z0-9_]+', '', re.sub(r'\s', '_', post_title.lower()))
         print(wiki_name)
         new_submission = post_to_subreddit.submit(title=post_title,
                                                   selftext=submission.selftext,
@@ -111,9 +111,11 @@ class RedditMonitor(object):
         return new_submission
 
     def notify_modmail(self, created_by, submission, wiki_name):
-        subreddit = self.reddit.subreddit(self.state.config['notify_modmail']['subreddit'])
+        subreddit_name = self.state.config['notify_modmail']['subreddit']
+        subreddit = self.reddit.subreddit(subreddit_name)
         body = f"u/{created_by} created a new shared submission\n\n" + \
                f"[{submission.title}]({submission.permalink})"
         if wiki_name:
+            wiki_name = wiki_name.replace(f"{subreddit_name}/wiki/", f"{subreddit_name}/wiki/edit/")
             body += f" ^([edit here]({wiki_name}))"
         subreddit.message("[Notification] New moderator shared post", body)
